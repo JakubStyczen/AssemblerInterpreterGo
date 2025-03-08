@@ -1,4 +1,4 @@
-package main
+package assemblerinterpretergo
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func TestMov(t *testing.T) {
 	}{
 		{"mov a, 5\nend", map[string]int{"a": 5}},
 		{"mov a,  5\nend", map[string]int{"a": 5}},
-		{"mov a, 5\nmov b, a", map[string]int{"a": 5, "b": 5}},
+		{"mov a, 5\nmov b, a\nend", map[string]int{"a": 5, "b": 5}},
 	}
 	for _, tt := range tests {
 		t.Run("Mov instruction", func(t *testing.T) {
@@ -95,8 +95,8 @@ func TestJne(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 5\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njne kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 5, "b": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njne kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 5, "b": 3, "c": 3}},
+		{"mov a, 5\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njne kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 5, "b": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njne kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 5, "b": 3, "c": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Jne instruction", func(t *testing.T) {
@@ -112,8 +112,8 @@ func TestJe(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 5\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\nje kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 6, "b": 3, "c": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\nje kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 4, "b": 3}},
+		{"mov a, 5\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\nje kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 6, "b": 3, "c": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\nje kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 4, "b": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Je instruction", func(t *testing.T) {
@@ -129,8 +129,8 @@ func TestJg(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 6\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njg kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 7, "b": 3, "c": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njg kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 4, "b": 3}},
+		{"mov a, 6\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njg kox\n ret\nkox:\nmov c, 3\ndec a\njmp compare", map[string]int{"a": 5, "b": 3, "c": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njg kox\n ret\nkox:\nmov c, 3\ndec a\njmp compare", map[string]int{"a": 4, "b": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Jg instruction", func(t *testing.T) {
@@ -146,9 +146,9 @@ func TestJge(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 6\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 7, "b": 3, "c": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 4, "b": 3}},
-		{"mov a, 5\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 6, "b": 3, "c": 3}},
+		{"mov a, 6\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ndec a\njmp compare", map[string]int{"a": 4, "b": 3, "c": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ndec a\njmp compare", map[string]int{"a": 4, "b": 3}},
+		{"mov a, 5\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njge kox\n ret\nkox:\nmov c, 3\ndec a\njmp compare", map[string]int{"a": 4, "b": 3, "c": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Jge instruction", func(t *testing.T) {
@@ -164,8 +164,8 @@ func TestJl(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 6\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njl kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 6, "b": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njl kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 5, "b": 3, "c": 3}},
+		{"mov a, 6\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njl kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 6, "b": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njl kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 5, "b": 3, "c": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Jl instruction", func(t *testing.T) {
@@ -181,9 +181,9 @@ func TestJle(t *testing.T) {
 		program            string
 		expected_registers map[string]int
 	}{
-		{"mov a, 6\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 6, "b": 3}},
-		{"mov a, 4\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 5, "b": 3, "c": 3}},
-		{"mov a, 5\njmp compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\nret", map[string]int{"a": 6, "b": 3, "c": 3}},
+		{"mov a, 6\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 6, "b": 3}},
+		{"mov a, 4\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 6, "b": 3, "c": 3}},
+		{"mov a, 5\ncall compare\nmov b, 3\nnop\nend\ncompare:\ncmp a, 5\njle kox\n ret\nkox:\nmov c, 3\ninc a\njmp compare", map[string]int{"a": 6, "b": 3, "c": 3}},
 	}
 	for _, tt := range tests {
 		t.Run("Jle instruction", func(t *testing.T) {
@@ -242,9 +242,9 @@ func TestCall(t *testing.T) {
 func TestMsg(t *testing.T) {
 	tests := []struct {
 		program         string
-		expected_result string
+		expected_result Result
 	}{
-		{"mov a, 3\nmsg  '(5+1)/2 = ', a\nend", "(5+1)/2 = 3"},
+		{"mov a, 3\nmsg  '(5+1)/2 = ', a\nend", Result{"(5+1)/2 = 3", 0}},
 	}
 	for _, tt := range tests {
 		t.Run("Msg instruction", func(t *testing.T) {

@@ -1,4 +1,4 @@
-package main
+package assemblerinterpretergo
 
 import (
 	"testing"
@@ -99,7 +99,7 @@ func TestParseProgram(t *testing.T) {
 				"jne   proc_fact",
 				"ret",
 			},
-			6,
+			12,
 		},
 		{
 			"mov a, 5\nend", []string{"mov a, 5", "end"}, 2,
@@ -115,7 +115,7 @@ func TestParseProgram(t *testing.T) {
 	}
 }
 
-func TestParseCustomSubroutines(t *testing.T) {
+func TestParseLabels(t *testing.T) {
 	tests := []struct {
 		subr_defs []string
 		expected  map[string]int
@@ -128,7 +128,7 @@ func TestParseCustomSubroutines(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run("Subroutines parsing", func(t *testing.T) {
-			result := ParseCustomSubroutines(tt.subr_defs)
+			result := ParseLabels(tt.subr_defs)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

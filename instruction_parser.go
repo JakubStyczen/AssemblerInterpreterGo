@@ -1,10 +1,8 @@
-package main
+package assemblerinterpretergo
 
 import (
 	"strconv"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
 
 func ParseArg(arg string, reg map[string]int) int {
@@ -31,9 +29,9 @@ func filterEmptyLinesAndComments(program_lines []string) []string {
 	return filter_comment_lines
 }
 
-func ParseCustomSubroutines(program_function_defs []string) map[string]int {
+func ParseLabels(program_instruction_list []string) map[string]int {
 	subroutines := make(map[string]int)
-	for i, line := range program_function_defs {
+	for i, line := range program_instruction_list {
 		if strings.Contains(line, ":") {
 			subroutines[strings.Split(line, ":")[0]] = i
 		}
@@ -41,18 +39,13 @@ func ParseCustomSubroutines(program_function_defs []string) map[string]int {
 	return subroutines
 }
 
-func ParseProgram(program string) (instruction_list []string, end_inx int) {
+func ParseProgram(program string) (instruction_list []string, program_length int) {
 	raw_lines := strings.Split(program, "\n")
 	filter_comment_lines := filterEmptyLinesAndComments(raw_lines)
 	for i := range filter_comment_lines {
 		filter_comment_lines[i] = strings.Trim(filter_comment_lines[i], " \t")
 	}
-	end_inx = slices.IndexFunc(filter_comment_lines, func(line string) bool { return strings.Contains(line, "end") })
-	if end_inx == -1 {
-		end_inx = len(filter_comment_lines)
-		return filter_comment_lines, end_inx
-	}
-	return filter_comment_lines, end_inx + 1
+	return filter_comment_lines, len(filter_comment_lines)
 }
 
 func trim_array(arr []string, delimiter string) []string {
@@ -74,7 +67,7 @@ func PrepareInstruction(instruction string) (string, []string) {
 		return instruction_parts[0], msg_args
 	}
 	instruction_parts = trim_array(instruction_parts, " ")
-	//only label to subroutines or end and ret
+	//only label to subroutines or end, ret, nop and label:
 	if len(instruction_parts) == 1 {
 		return instruction_parts[0], []string{}
 	}
